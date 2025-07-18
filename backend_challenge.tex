@@ -1,0 +1,66 @@
+\documentclass[10pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Modern Roman font
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref} % For clickable links
+\usepackage{enumitem} % For custom list environments
+\usepackage{xcolor} % For colors
+
+% Define a custom color for headings
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+
+\title{\textcolor{darkblue}{\textbf{Backend Interview Challenge}}}
+\author{Stanley Shikwambi} % No author
+\date{18 July 2025} % No date
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % No page number on the first page
+
+\begin{center}
+    \textit{You are what you do, not what you say you'll do - Carl Jung}
+\end{center}
+
+\vspace{1cm}
+
+Your task is to demonstrate your frontend development skills by interacting with a provided backend service. The service provides an API that pulls data from a database that stores details about different football players.
+
+\section*{\textcolor{darkblue}{Provided Backend Service Details}}
+The existing backend service is already running and accessible at:
+\textbf{\texttt{http://0.0.0.0:8000}}
+
+\subsection*{Authentication:}
+This service requires authentication. To get an API key, make a \texttt{POST} request to \texttt{/auth}. You will receive a unique API key \texttt{api\_key} that must be passed in the \texttt{x-api-key} header for all subsequent requests to protected endpoints.
+
+\subsection*{Available Routes:}
+\begin{itemize}[label=\textbullet, leftmargin=*, itemsep=0.5em]
+    \item \texttt{POST /auth}: Get an API key.
+    \item \texttt{POST /createPlayer}: Create a new player.
+    \item \texttt{GET /getPlayers}: Get a list of all players.
+    \item \texttt{GET /getPlayer/\{id\}}: Get a single player by ID.
+    \item \texttt{PUT /updatePlayer/\{id\}}: Update an existing player.
+    \item \texttt{DELETE /deletePlayer/\{id\}}: Delete a player.
+\end{itemize}
+
+\section*{\textcolor{darkblue}{Your Challenge}}
+\begin{enumerate}[label=\arabic*., leftmargin=*, itemsep=0.5em]
+    \item \textbf{Authentication and Caching:} Implement a mechanism to obtain an API key from the \texttt{/auth} endpoint. This API key has a Time-To-Live (TTL) of 60 minutes. You will need to implement a caching strategy to store and reuse this token, and also a refresh strategy to obtain a new token when the current one expires.
+    \item \textbf{Data Retrieval and Augmentation:} Call the \texttt{GET /getPlayers} route from the provided backend service. For each player retrieved, add two new fields with any data you deem relevant (e.g., calculated age, a new statistic, a derived property).
+    \item \textbf{New Backend Service:} Build a new backend service (using any stack of your choice) that exposes a single \texttt{GET /new-players} route. This route should return the list of players with the two new fields you added.
+\end{enumerate}
+
+\section*{\textcolor{darkblue}{Guidelines}}
+\begin{itemize}[label=\textbullet, leftmargin=*, itemsep=0.5em]
+    \item You may use any backend stack or framework of your choice (e.g., Node.js, Python, Go, Java).
+    \item You are allowed to use AI tools to assist you, but please do not use them to generate the entire solution. We are interested in seeing your problem-solving approach and coding style.
+    \item Focus on clean code, good practices, and efficient data handling.
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+    \textit{Good luck and have fun!}
+\end{center}
+
+\end{document}

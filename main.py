@@ -3,11 +3,26 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional
 from uuid import uuid4
+from datetime import datetime, timedelta
 import motor.motor_asyncio
+from fastapi.middleware.cors import CORSMiddleware
 
 from model import PlayerModel, UpdatePlayerModel
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",  # React/Vite frontend running on localhost
+    "https://yourfrontend.com"  # Deployed frontend (if any)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],              # Which frontend origins are allowed
+    allow_credentials=True,
+    allow_methods=["*"],                # Allow all HTTP methods (POST, GET, etc.)
+    allow_headers=["*"],                # Allow all headers
+)
 
 mongo_details = "mongodb://mongodb:27017"
 
@@ -17,7 +32,7 @@ database = client.ballers_db
 
 player_collection = database.get_collection("players")
 
-API_KEY: Optional[str] = None
+API_KEY_STORE = {"key": None, "expiry": None}
 
 def serialize_player(player):
     player["_id"] = str(player["_id"])
@@ -25,13 +40,16 @@ def serialize_player(player):
 
 @app.post("/auth", response_description="Generate API Key")
 async def get_api_key():
-    global API_KEY
-    API_KEY = str(uuid4())
-    return {"api_key": API_KEY}
+    global API_KEY_STORE
+    API_KEY_STORE["key"] = str(uuid4())
+    API_KEY_STORE["expiry"] = datetime.now() + timedelta(minutes=60) # 60 minutes TTL
+    return {"api_key": API_KEY_STORE["key"], "expires_in_minutes": 60}
 
 async def verify_api_key(x_api_key: str = Header(...)):
-    if API_KEY is None or x_api_key != API_KEY:
+    if API_KEY_STORE["key"] is None or x_api_key != API_KEY_STORE["key"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API Key")
+    if datetime.now() > API_KEY_STORE["expiry"]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API Key expired. Please generate a new one.")
 
 @app.post("/createPlayer", response_description="Add new player", response_model=PlayerModel, dependencies=[Depends(verify_api_key)])
 async def create_player(player: PlayerModel = Body(...)):
